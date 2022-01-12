@@ -1,0 +1,20 @@
+OBJECT_NAME = syscall.o basic_io.o
+OBJECTS = $(addprefix build/, $(OBJECT_NAME))
+CC = riscv64-linux-gnu-gcc
+CFLAGS = -c -I ../header
+
+$(OBJECTS): build/%.o: %.c | build/
+	$(CC) $(CFLAGS) -o $@ $^
+
+build/usrlib.a: $(OBJECTS) | build/
+	ar rcs $@ $^
+
+build/:
+	mkdir -p $@
+
+all: build/usrlib.a
+
+clean:
+	rm -rf build
+
+.PHONY: all clean

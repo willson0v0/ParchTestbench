@@ -9,10 +9,10 @@ $(PARCH_USRLIB):
 	make -C $(PARCH_USRLIB) all
 
 build/linux/00_helloworld: $(LINUX_USRLIB) | build/linux/
-	riscv64-linux-gnu-gcc -static -I $(LINUX_USRLIB)/../header helloworld.c $(LINUX_USRLIB)$(LIB_PATH) -o $@
+	riscv64-linux-gnu-gcc -g -static -I $(LINUX_USRLIB)/../header helloworld.c $(LINUX_USRLIB)$(LIB_PATH) -o $@
 
 build/parch/00_helloworld: $(PARCH_USRLIB) | build/parch/
-	riscv64-unknown-elf-gcc -static -nostdlib -nodefaultlibs --freestanding -I$(PARCH_USRLIB)/../header helloworld.c $(PARCH_USRLIB)$(LIB_PATH) -o $@
+	riscv64-unknown-elf-gcc -Tparch_linker.ld -g -static -nostdlib -nodefaultlibs --freestanding -I$(PARCH_USRLIB)/../header helloworld.c $(PARCH_USRLIB)$(LIB_PATH) -o $@
 
 build/linux/:
 	mkdir -p $@

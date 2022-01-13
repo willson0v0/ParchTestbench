@@ -1,7 +1,7 @@
 OBJECT_NAME = syscall.o basic_io.o
 OBJECTS = $(addprefix build/, $(OBJECT_NAME))
 CC = riscv64-linux-gnu-gcc
-CFLAGS = -c -I ../header
+CFLAGS = -c -I ../header  -g
 
 $(OBJECTS): build/%.o: %.c | build/
 	$(CC) $(CFLAGS) -o $@ $^

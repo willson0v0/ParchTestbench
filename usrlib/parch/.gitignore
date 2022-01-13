@@ -1,2 +1,2 @@
-syscall.asm
+syscall.S
 build

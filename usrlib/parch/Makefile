@@ -4,8 +4,8 @@ C_OBJECTS = $(addprefix build/, $(C_OBJECT_NAME))
 ASM_OBJECTS = $(addprefix build/, $(ASM_OBJECT_NAME))
 OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
 CC = riscv64-unknown-elf-gcc
-CFLAGS = -c -I ../header -nodefaultlibs --freestanding -nostdlib
-ASMFLAGS = -c -nodefaultlibs --freestanding -nostdlib
+CFLAGS = -c -I ../header -nodefaultlibs --freestanding -nostdlib -g
+ASMFLAGS = -c -nodefaultlibs --freestanding -nostdlib -g
 
 syscall.S: syscall_gen.py
 	python syscall_gen.py

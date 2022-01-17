@@ -1,11 +1,13 @@
+.DEFAULT_GOAL := all
+
 C_OBJECT_NAME = basic_io.o
 ASM_OBJECT_NAME = syscall.o crt.o
 C_OBJECTS = $(addprefix build/, $(C_OBJECT_NAME))
 ASM_OBJECTS = $(addprefix build/, $(ASM_OBJECT_NAME))
 OBJECTS = $(C_OBJECTS) $(ASM_OBJECTS)
 CC = riscv64-unknown-elf-gcc
-CFLAGS = -c -I ../header -nodefaultlibs --freestanding -nostdlib -g
-ASMFLAGS = -c -nodefaultlibs --freestanding -nostdlib -g
+CFLAGS = -c -I ../header -nodefaultlibs --freestanding -nostdlib -g -mcmodel=medany
+ASMFLAGS = -c -nodefaultlibs --freestanding -nostdlib -g -mcmodel=medany
 
 syscall.S: syscall_gen.py
 	python syscall_gen.py

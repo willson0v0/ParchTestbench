@@ -19,6 +19,6 @@ clean:
 	rm -rf rootfs
 
 parchfs: parchfs.cpp
-	g++ $^ -o $@
+	g++ -std=gnu++17 -g $^ -o $@
 
 .PHONY: clean files $(TP_BINARIES)

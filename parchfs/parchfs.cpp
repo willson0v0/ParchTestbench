@@ -355,9 +355,9 @@ ParchFS::ParchFS(const char* src_bin, const char* src_sym): mmap_bin(MMAPBinCont
 
     superblock      = (SuperBlock*      )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock));
     fs_block_bitmap = (FSBlockBitmap*   )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap));
-    mm_block_bitmap = (FSBlockBitmap*   )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(FSBlockBitmap));
-    inode_bitmap    = (INodeBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(FSBlockBitmap) - sizeof(INodeBitmap));
-    inode_list      = (INodeList*       )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(FSBlockBitmap) - sizeof(INodeBitmap) - sizeof(INodeList));
+    mm_block_bitmap = (FSBlockBitmap*   )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap));
+    inode_bitmap    = (INodeBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap) - sizeof(INodeBitmap));
+    inode_list      = (INodeList*       )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap) - sizeof(INodeBitmap) - sizeof(INodeList));
 
     // magic assert
     assert(MMapAddr(superblock      ) - mmap_bin.mmap_ptr + uint64_t(s_kernel) == 0xFFFFF000);
@@ -545,9 +545,12 @@ void ParchFS::dump(std::string name) {
 }
 
 // copy all rootfs stuff into this file system
-int main() {
-    ParchFS fs("../../output/parch.bin", "../../output/parch.sym");
-    fs.make_fs(ROOT_INODE, std::string("rootfs"), std::string(""));
-    fs.dump("../../output/parch_fs.bin");
+int main(int argc, char* argv[]) {
+    if(argc != 5) {
+        panic("Must have 4 arguments.");
+    }
+    ParchFS fs(argv[1], argv[2]);
+    fs.make_fs(ROOT_INODE, std::string(argv[4]), std::string(""));
+    fs.dump(argv[3]);
     return 0;
 }

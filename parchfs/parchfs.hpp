@@ -69,16 +69,16 @@ struct INode {
     FType f_type;
     uint32_t uid;
     uint32_t gid;
-    uint32_t f_size;
-    uint64_t access_time;
-    uint64_t change_time;
-    uint64_t create_time;
     uint32_t flags;
     uint32_t hard_link_count;
     BlockNo direct_blk_no[DIRECT_BLK_COUNT];
     BlockNo indirect_blk;
     BlockNo indirect_blk2;
-    uint8_t reserved[136];
+    uint64_t f_size;
+    uint64_t access_time;
+    uint64_t change_time;
+    uint64_t create_time;
+    uint8_t reserved[128];
 
     void write(size_t off, uint8_t* buf, size_t len, ParchFS* fs);
     void read(size_t off, uint8_t* buf, size_t len, ParchFS* fs);

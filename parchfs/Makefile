@@ -16,9 +16,11 @@ rootfs/:
 	mkdir -p $@
 
 clean:
-	rm -rf rootfs
+	rm -rf rootfs parchfs
 
 parchfs: parchfs.cpp
 	g++ -std=gnu++17 -g $^ -o $@
+
+all: parchfs files
 
 .PHONY: clean files $(TP_BINARIES)

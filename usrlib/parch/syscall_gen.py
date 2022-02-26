@@ -8,6 +8,7 @@ syscall_num = {
 	'fork'	: '4',
 	'exec'	: '5',
 	'exit'	: '6',
+	'mmap'	: '7',
 }
 
 def main():

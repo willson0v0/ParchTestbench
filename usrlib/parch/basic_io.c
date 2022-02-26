@@ -2,7 +2,7 @@
 #include <../header/syscall.h>
 
 int vfprintf(int fd, char* format, va_list arg) {
-	tb_write(fd, "Not Implemented", -1);
+	tb_write(fd, "Not Implemented", -1, 0);
 }
 
 int tb_printf(char* format, ...) {

@@ -3,11 +3,13 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-int tb_write(int fd, char* buf, int length) {
+int tb_write(int fd, char* buf, int length, int offset) {
+	lseek(fd, offset, SEEK_SET);
 	return write(fd, buf, length);
 }
 
-int tb_read(int fd, char* buf, int length) {
+int tb_read(int fd, char* buf, int length, int offset) {
+	lseek(fd, offset, SEEK_SET);
 	return read(fd, buf, length);
 }
 

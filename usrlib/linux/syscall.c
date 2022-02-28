@@ -2,33 +2,73 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 
-int tb_write(int fd, char* buf, int length, int offset) {
+__attribute__((noreturn)) void todo(char* msg) {
+	printf("%s", msg);
+	exit(-1);
+}
+
+
+u64 tb_write(FileDescriptor fd, char* buf, u64 length, u64 offset) {
 	lseek(fd, offset, SEEK_SET);
 	return write(fd, buf, length);
 }
 
-int tb_read(int fd, char* buf, int length, int offset) {
+u64 tb_read(FileDescriptor fd, char* buf, u64 length, u64 offset) {
 	lseek(fd, offset, SEEK_SET);
 	return read(fd, buf, length);
 }
 
-int tb_open(char* path, int flags) {
+FileDescriptor tb_open(char* path, int flags) {
 	return open(path, flags);
 }
 
-int tb_openat(int dirfd, char* path, int flags) {
+FileDescriptor tb_openat(FileDescriptor dirfd, char* path, int flags) {
 	return openat(dirfd, path, flags);
 }
 
-int tb_fork() {
+u64 tb_close(FileDescriptor fd) {
+	return close(fd);
+}
+
+FileDescriptor tb_dup(FileDescriptor fd) {
+	return dup(fd);
+}
+
+u64 tb_fork() {
 	return fork();
 }
 
-int tb_exec(char* file, char* argv[]) {
+u64 tb_exec(char* file, char* argv[]) {
 	return fork();
 }
 
-__attribute__((noreturn)) void tb_exit(int code) {
+__attribute__((noreturn)) void tb_exit(u64 code) {
 	exit(code);
 }
+
+// TODO: change flag to linux format
+void* tb_mmap(FileDescriptor fd, u64 flag) {
+	struct stat st;
+	fstat(fd, &st);
+	u64 linux_flag = 0;
+	if(flag & (1 << 1)) {
+		linux_flag |= PROT_READ;
+	}
+	if(flag & (1 << 2)) {
+		linux_flag |= PROT_WRITE;
+	}
+	if(flag & (1 << 3)) {
+		linux_flag |= PROT_EXEC;
+	}
+	mmap(0, st.st_size, linux_flag, MAP_SHARED, fd, 0);
+}
+
+PID tb_waitpid(PID to_wait, u64* ret) {
+	return waitpid(to_wait, ret, 0);
+}
+

@@ -15,7 +15,7 @@ void set_bit_val(uint8_t& bits, bool val, size_t pos) {
 bool get_bit(uint8_t bits, size_t pos) {
     return bits & (1 << pos);
 }
-
+__attribute__((noreturn))
 void panic(const char* format, ...) {
     std::cout << "PANIC: ";
     va_list args;
@@ -23,6 +23,7 @@ void panic(const char* format, ...) {
     vprintf(format, args);
     va_end (args);
     exit(-1);
+    __builtin_unreachable();
 }
 
 

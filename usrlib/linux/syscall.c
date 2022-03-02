@@ -13,13 +13,11 @@ __attribute__((noreturn)) void todo(char* msg) {
 }
 
 
-u64 tb_write(FileDescriptor fd, char* buf, u64 length, u64 offset) {
-	lseek(fd, offset, SEEK_SET);
+u64 tb_write(FileDescriptor fd, char* buf, u64 length) {
 	return write(fd, buf, length);
 }
 
-u64 tb_read(FileDescriptor fd, char* buf, u64 length, u64 offset) {
-	lseek(fd, offset, SEEK_SET);
+u64 tb_read(FileDescriptor fd, char* buf, u64 length) {
 	return read(fd, buf, length);
 }
 

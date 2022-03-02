@@ -3,8 +3,8 @@
 
 #include "type.h"
 
-u64 tb_write(FileDescriptor, char*, u64, u64);
-u64 tb_read(FileDescriptor, char*, u64, u64);
+u64 tb_write(FileDescriptor, char*, u64);
+u64 tb_read(FileDescriptor, char*, u64);
 FileDescriptor tb_open(char*, int);
 FileDescriptor tb_openat(FileDescriptor, char*, int);
 u64 tb_close(FileDescriptor);
@@ -17,5 +17,7 @@ PID tb_waitpid(PID, u64*);
 u64 tb_signal(PID, SignalNum); 
 u64 tb_sigaction(PID, SigHandler); 
 u64 tb_sigreturn(); 
+u64 tb_getcwd(char*, u64);
+u64 tb_chdir(char*, u64);
 
 #endif

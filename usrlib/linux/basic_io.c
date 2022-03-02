@@ -10,3 +10,11 @@ int tb_printf(char* format, ...) {
 
 	return done;
 }
+
+char tb_getc() {
+	getchar();
+}
+
+u64 tb_getline(char* buf, u64 length) {
+	return getline(buf, length, 0);
+}

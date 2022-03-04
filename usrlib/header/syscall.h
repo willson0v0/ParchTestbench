@@ -18,6 +18,6 @@ u64 tb_signal(PID, SignalNum);
 u64 tb_sigaction(PID, SigHandler); 
 u64 tb_sigreturn(); 
 u64 tb_getcwd(char*, u64);
-u64 tb_chdir(char*, u64);
+u64 tb_chdir(char*);
 
 #endif

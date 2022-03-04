@@ -9,7 +9,7 @@ CC = riscv64-unknown-elf-gcc
 CFLAGS = -c -I ../header -nodefaultlibs --freestanding -nostdlib -g -mcmodel=medany
 ASMFLAGS = -c -nodefaultlibs --freestanding -nostdlib -g -mcmodel=medany
 
-syscall.S: syscall_gen.py
+syscall.S: syscall_gen.py ../../../syscall_num.csv
 	python syscall_gen.py
 
 $(C_OBJECTS): build/%.o: %.c | build/

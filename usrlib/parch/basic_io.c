@@ -137,6 +137,10 @@ char tb_getc()
 {
     char res = getc_noecho();
     tb_write(1, &res, 1);
+    // add an \n for \r
+    if (res == '\r') {
+        tb_write(1, "\n", 1);
+    }
     return res;
 }
 
@@ -148,10 +152,11 @@ u64 tb_getline(char *buf, u64 length)
     while (p - buf < length - 1)
     {
         char c = tb_getc();
-        if (c != '\n')
-            *(p++) = c;
-        else
+
+        if (c == '\n' || c == '\r')
             break;
+            
+        *(p++) = c;
     }
     *p = 0;
     return p - buf;

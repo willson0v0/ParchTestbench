@@ -1,5 +1,6 @@
 #include <syscall.h>
 #include <basic_io.h>
+#include <utils.h>
 
 void print_cwd() {
     char cwd[256];
@@ -21,42 +22,47 @@ int serve_cd(char* cmd) {
     return tb_chdir(dir);
 }
 
-void strcpy(char* src, char* dst) {
-    while(*src) {
-        *(dst++) = *(src++);
-    }
+int serve_exit(char* cmd) {
+    tb_printf("[shell] bye.");
+    tb_exit(0);
 }
 
-void memcpy(char* src, char* dst, u64 len) {
-    while(len --> 0) {
-        *(dst++) = *(src++);
-    }
+int serve_help(char* cmd) {
+    tb_printf("Built-in commands:\r\n");
+    tb_printf("\tcd [dir]\t: change current working directory.\r\n");
+    tb_printf("\thelp\t: display help message.\r\n");
+    tb_printf("\texit\t: exit shell.\r\n");
+    tb_printf("\r\nPlease enter built-in commands, or path to elf file to execute.\r\n");
+    return 0;
 }
 
 void memset(char* ptr, u8 b, u64 len) {
-    while(len --> 0) 
-        *(ptr++) = b;
+    tb_memset(ptr, b, len);
 }
 
 int exec_cmd(char* cmd) {
     char name[128] = {0};
-    char arg_str[16][32];
+    char arg_str[16][32] = {0};
     // first, find program name
     char* p = cmd;
     while(*p != ' ' && *p != '\0') {
         p++;
     }
-    memcpy(cmd, name, (p - cmd));
+    tb_memcpy(cmd, name, (p - cmd));
     u64 argv_idx = 0;
+
     while (*p != '\0') {
+        while (*p == ' ') {
+            p++;
+        }
         char* arg = p;
         while(*p != ' ' && *p != '\0') {
             p++;
         }
-        memcpy(arg, arg_str[argv_idx++], p - arg);
+        tb_memcpy(arg, arg_str[argv_idx++], p - arg);
     }
     char* argv[16] = {0};
-    for (int i = 0; i < argv_idx++; i++) {
+    for (int i = 0; i < argv_idx; i++) {
         argv[i] = arg_str[i];
     }
 
@@ -77,7 +83,9 @@ int parse_cmd(char* cmd) {
     if(start_with(cmd, "cd ")) {
         return serve_cd(cmd);
     } else if(start_with(cmd, "help")) {
-        tb_printf("No help for you.");
+        return serve_help(cmd);
+    } else if(start_with(cmd, "exit")) {
+        return serve_exit(cmd);
     } else {
         exec_cmd(cmd);
     }

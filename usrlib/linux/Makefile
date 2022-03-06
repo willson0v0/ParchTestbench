@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := all
 
-OBJECT_NAME = syscall.o basic_io.o
+OBJECT_NAME = $(addsuffix .o, $(basename $(shell find . -name '*.c')))
 OBJECTS = $(addprefix build/, $(OBJECT_NAME))
 CC = riscv64-linux-gnu-gcc
 CFLAGS = -c -I ../header  -g

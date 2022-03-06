@@ -15,4 +15,22 @@ typedef u64 PID;
 typedef u64 SignalNum;
 typedef void (*SigHandler)();
 
+typedef struct
+{
+    u32 inode;
+    u16 f_type;
+    char name[122];
+} Dirent;
+
+typedef enum {
+    SOCKET  = 0001,
+    LINK    = 0002,
+    REGULAR = 0004,
+    BLOCK   = 0010,
+    DIR     = 0020,
+    CHAR    = 0040,
+    FIFO    = 0100,
+} FType;
+
+
 #endif

@@ -151,7 +151,9 @@ void INode::add_dentry(DEntry d, ParchFS* fs) {
         if (de->inode == BAD_INODE) {
             memset(de, 0, sizeof(DEntry));
             std::cout 
-                << "adding new detry \"" 
+                << "adding new "
+                << d.f_type
+                << " detry \"" 
                 << std::string((char*)d.f_name, d.name_len) 
                 << "\" into inode " 
                 << this->get_no(fs) 

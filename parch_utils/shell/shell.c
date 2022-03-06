@@ -18,7 +18,7 @@ int start_with(char* to_match, char* pattern) {
 
 int serve_cd(char* cmd) {
     char* dir = &cmd[3];
-    return tb_chdir(cmd);
+    return tb_chdir(dir);
 }
 
 void strcpy(char* src, char* dst) {
@@ -60,10 +60,10 @@ int exec_cmd(char* cmd) {
         argv[i] = arg_str[i];
     }
 
-    u64 fork_res = tb_fork();
+    int fork_res = tb_fork();
     if (fork_res == 0) {
         u64 res = tb_exec(name, argv);
-        tb_printf("exec failed with errno %d. \r\n", res);
+        tb_printf("exec %s failed with errno %d. \r\n", name, res);
         tb_exit(-1);
     } else {
         u64 exec_res;
@@ -90,7 +90,7 @@ int main() {
 
         char linebuf[1024];
         tb_getline(linebuf, 1024);
-        if (!parse_cmd(linebuf)) {
+        if (parse_cmd(linebuf)) {
             tb_printf("Unable to understand input \"%s\"\r\n", linebuf);
         }
     }

@@ -129,14 +129,19 @@ int tb_printf(char *format, ...)
 char getc_noecho()
 {
     char buf;
-    tb_read(0, &buf, 1);
+    i64 res = tb_read(0, &buf, 1);
+    if (res <= 0) {
+        return 0xff;
+    }
     return buf;
 }
 
 char tb_getc()
 {
     char res = getc_noecho();
-    // tb_printf("%d %c \r\n", res, res);
+    if (res == 0xff) {
+        return res;
+    }
     tb_write(1, &res, 1);
     // add an \n for \r
     if (res == '\r') {
@@ -155,8 +160,9 @@ u64 tb_getline(char *buf, u64 length)
         char c = tb_getc();
 
         // end
-        if (c == '\n' || c == '\r')
+        if (c == '\n' || c == '\r' || c == 0xff || c == 4) {
             break;
+        }
         
         // del
         if (c == 127) {

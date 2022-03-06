@@ -1,0 +1,4 @@
+all:
+# dummy
+clean:
+# dummy

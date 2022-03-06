@@ -19,7 +19,7 @@ u64 tb_sigaction(PID, SigHandler);
 u64 tb_sigreturn(); 
 u64 tb_getcwd(char*, u64);
 u64 tb_chdir(char*);
-u64 tb_sbrk(i64);
+char* tb_sbrk(i64);
 u64 tb_getdents(FileDescriptor, Dirent*, u64);
 
 #endif

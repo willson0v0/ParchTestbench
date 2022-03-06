@@ -32,5 +32,27 @@ typedef enum {
     FIFO    = 0100,
 } FType;
 
+typedef enum {
+    OWNER_R = 0400,
+    OWNER_W = 0200,
+    OWNER_X = 0100,
+    GROUP_R = 0040,
+    GROUP_W = 0020,
+    GROUP_X = 0010,
+    OTHER_R = 0004,
+    OTHER_W = 0002,
+    OTHER_X = 0001,
+} FPermission;
+
+
+typedef enum {
+    READ      = (1 << 0),
+    WRITE     = (1 << 1),
+    CREATE    = (1 << 2),
+    EXEC      = (1 << 3),
+    SYS       = (1 << 4),
+    NO_FOLLOW = (1 << 5),
+} OpenMode;
+
 
 #endif

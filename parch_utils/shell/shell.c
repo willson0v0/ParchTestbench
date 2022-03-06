@@ -28,11 +28,11 @@ int serve_exit(char* cmd) {
 }
 
 int serve_help(char* cmd) {
-    tb_printf("Built-in commands:\r\n");
-    tb_printf("\tcd [dir]\t: change current working directory.\r\n");
-    tb_printf("\thelp\t: display help message.\r\n");
-    tb_printf("\texit\t: exit shell.\r\n");
-    tb_printf("\r\nPlease enter built-in commands, or path to elf file to execute.\r\n");
+    tb_printf("Built-in commands:\n");
+    tb_printf("\tcd [dir]\t: change current working directory.\n");
+    tb_printf("\thelp\t: display help message.\n");
+    tb_printf("\texit\t: exit shell.\n");
+    tb_printf("\nPlease enter built-in commands, or path to elf file to execute.\n");
     return 0;
 }
 
@@ -69,18 +69,21 @@ int exec_cmd(char* cmd) {
     int fork_res = tb_fork();
     if (fork_res == 0) {
         u64 res = tb_exec(name, argv);
-        tb_printf("exec %s failed with errno %d. \r\n", name, res);
+        tb_printf("exec %s failed with errno %d. \n", name, res);
         tb_exit(-1);
     } else {
         u64 exec_res;
         tb_waitpid(fork_res, &exec_res);
-        tb_printf("\r\nProgram exited with code %d\r\n", exec_res);
+        tb_printf("\nProgram exited with code %d\n", exec_res);
         return 0;
     }
 }
 
 int parse_cmd(char* cmd) {
-    if(start_with(cmd, "cd ")) {
+    // empty input
+    if (tb_strlen(cmd) == 0) {
+        return 0;
+    } else if(start_with(cmd, "cd ")) {
         return serve_cd(cmd);
     } else if(start_with(cmd, "help")) {
         return serve_help(cmd);
@@ -91,15 +94,29 @@ int parse_cmd(char* cmd) {
     }
 }
 
-int main() {
+int main(u64 argc, char* argv[]) {
     tb_printf("[shell] Hello world!\n");
+
+    if (argc > 1) {
+        tb_close(0);
+        FileDescriptor fd = tb_open(argv[1], READ | EXEC);
+        if (fd != 0) {
+            tb_printf("failed to substitute fd 0.");
+            tb_exit(-1);
+        }
+    }
+
     while(1) {
         print_cwd();
 
         char linebuf[1024];
-        tb_getline(linebuf, 1024);
+        u64 res = tb_getline(linebuf, 1024);
+        if (res <= 0) {
+            tb_printf("Encounterd EOF. Exiting.\n");
+            tb_exit(0);
+        }
         if (parse_cmd(linebuf)) {
-            tb_printf("Unable to understand input \"%s\"\r\n", linebuf);
+            tb_printf("Unable to understand input \"%s\"\n", linebuf);
         }
     }
 }

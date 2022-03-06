@@ -1,0 +1,5 @@
+#!/shell
+/ls
+cd /test
+/ls
+00_helloworld

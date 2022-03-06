@@ -2,6 +2,10 @@
 #include <basic_io.h>
 
 int main() {
+    tb_open("/dev/pts", 1); // read
+    tb_open("/dev/pts", 2); // write
+    tb_open("/dev/pts", 2); // write
+
     tb_printf("[init_proc] Hello world!\n");
     int ret = tb_fork();
     if (ret == 0) {

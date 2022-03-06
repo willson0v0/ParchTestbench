@@ -20,7 +20,7 @@ u64 tb_strlen(char* str) {
     return p - str;
 }
 
-void* tb_memset(u8* buf, u8 byte, u64 len) {
+void tb_memset(u8* buf, u8 byte, u64 len) {
     while (len --> 0) {
         *(buf++) = 0;
     }

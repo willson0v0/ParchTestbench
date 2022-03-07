@@ -1,12 +1,12 @@
-ELF_FILE = target/riscv64gc-unknown-none-elf/debug/shell
+ELF_FILE = target/riscv64gc-unknown-none-elf/debug/mkdir
 
 $(ELF_FILE): $(shell find src -type f) $(shell find ../../usrlib_rust/src -type f)
 	cargo build --target-dir ./target
 
-./shell: $(ELF_FILE)
-	cp $(ELF_FILE) ./shell
+./mkdir: $(ELF_FILE)
+	cp $(ELF_FILE) ./mkdir
 
-all: ./shell
+all: ./mkdir
 
 clean:
 	cargo clean

@@ -468,7 +468,7 @@ BlockNo ParchFS::alloc_blk() {
     superblock->free_block--;
     // 0 for BAD_INODE or BAD_BLOCK
     memset(this->get_blk(res), 0, BLK_SIZE);
-    std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
+    // std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
     return res;
 }
 

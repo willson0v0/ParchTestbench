@@ -3,6 +3,7 @@ crate::enum_with_tryfrom_usize!{
     #[repr(usize)]
     #[derive(Debug, Clone, Copy, PartialEq, Eq)]
     pub enum ErrorNum {
+        NOERR           = 0     ,
         /// Operation not permitted
         EPERM           = 1     ,   
         /// No such file or directory

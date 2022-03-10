@@ -30,6 +30,8 @@ typedef enum {
     DIR     = 0020,
     CHAR    = 0040,
     FIFO    = 0100,
+    UNKNOWN = 0200,
+    MOUNT   = 0400,
 } FType;
 
 typedef enum {

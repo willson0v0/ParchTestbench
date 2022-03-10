@@ -79,6 +79,7 @@ pub fn getchar_noecho() -> Result<char, ErrorNum> {
 
 pub fn getchar() -> Result<char, ErrorNum> {
     let res = getchar_noecho()?;
+    if res == '\r' {print!("\n");}  // qemu uart is strange.
     print!("{}", res);
     Ok(res)
 }

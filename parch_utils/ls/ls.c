@@ -10,6 +10,8 @@ char* ftype_name[] = {
     [DIR] "DIR",
     [CHAR] "CHAR",
     [FIFO] "FIFO",
+    [UNKNOWN] "UNKNOWN",
+    [MOUNT] "MOUNT",
 };
 
 int main(u64 argc, char* argv[]) {

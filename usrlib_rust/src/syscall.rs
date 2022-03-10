@@ -56,15 +56,20 @@ pub fn read(fd: FileDecstiptor, buf: &mut [u8]) -> Result<usize, ErrorNum> {
     read_raw(fd, buf.as_mut_ptr(), buf.len())
 }
 
+pub fn read_vec(fd: FileDecstiptor, length: usize) -> Result<Vec<u8>, ErrorNum> {
+    let mut buf = [0u8].repeat(length);
+    read(fd, buf.as_mut_slice())?;
+    Ok(buf)
+}
+
 pub fn open(path: &str, open_mode: OpenMode) -> Result<FileDecstiptor, ErrorNum> {
     let mut arr = path.as_bytes().to_vec();
     arr.push(0);
     // let p = path.as_ptr();
     do_syscall([
         arr.as_ptr() as usize,
-        path.len(),
         open_mode.bits()
-        ,0,0,0
+        ,0,0,0,0
     ], SYSCALL_OPEN).map(|f| f.into())
 }
 

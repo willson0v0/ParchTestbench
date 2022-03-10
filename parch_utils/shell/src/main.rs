@@ -138,18 +138,24 @@ impl Command {
 
                 if input_pos < output_pos {
                     let (e, i_o) = cmd.split_at(input_pos);
+                    let i_o = i_o.strip_prefix('<').unwrap();
                     let (i, o) = i_o.split_at(output_pos - input_pos);
+                    let o = o.strip_prefix('>').unwrap();
                     (e.trim().to_string(), Some(i.trim().to_string()), Some(o.trim().to_string()))
                 } else {
                     let (e, o_i) = cmd.split_at(output_pos);
+                    let o_i = o_i.strip_prefix('>').unwrap();
                     let (o, i) = o_i.split_at(input_pos - output_pos);
+                    let i = i.strip_prefix('<').unwrap();
                     (e.trim().to_string(), Some(i.trim().to_string()), Some(o.trim().to_string()))
                 }
             } else if let Some(input_pos) = input_pos {
                 let (e, i) = cmd.split_at(input_pos);
+                let i = i.strip_prefix('<').unwrap();
                 (e.trim().to_string(), Some(i.trim().to_string()), None)
             } else if let Some(output_pos) = output_pos {
                 let (e, o) = cmd.split_at(output_pos);
+                let o = o.strip_prefix('>').unwrap();
                 (e.trim().to_string(), None, Some(o.trim().to_string()))
             } else {
                 (cmd.trim().to_string(), None, None)
@@ -207,7 +213,7 @@ impl Command {
             if let IOType::File(path) = &self.output {
                 // close stdin, open file as read
                 close(STDOUT)?;
-                let fd = open(path.as_str(), OpenMode::WRITE)?;
+                let fd = open(path.as_str(), OpenMode::WRITE | OpenMode::CREATE)?;
                 if fd != STDOUT {
                     panic!("Failed to re-open fd 1 to redirect input, re-opened fd is {:?}.", fd);
                 }

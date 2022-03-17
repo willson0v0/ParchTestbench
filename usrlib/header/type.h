@@ -56,5 +56,12 @@ typedef enum {
     NO_FOLLOW = (1 << 5),
 } OpenMode;
 
+typedef struct {
+    u64 persistant_usage;
+    u64 runtime_usage;
+    u64 kernel_usage;
+    u64 total_available;
+} SysStat;
+
 
 #endif

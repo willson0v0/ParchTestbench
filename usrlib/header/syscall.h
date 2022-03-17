@@ -21,5 +21,7 @@ u64 tb_getcwd(char*, u64);
 u64 tb_chdir(char*);
 char* tb_sbrk(i64);
 u64 tb_getdents(FileDescriptor, Dirent*, u64);
+u64 tb_pipe(FileDescriptor fds[2]);
+u64 tb_sysstat(SysStat* stat_ptr);
 
 #endif

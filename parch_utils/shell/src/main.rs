@@ -251,7 +251,7 @@ fn print_header() {
 
 #[no_mangle]
 fn main(argc: usize, argv: &[&[u8]]) -> isize {
-    // println!("rust hello world!");
+    println!("[shell] hello world!");
     // println!("argc: {}", argc);
     // for i in 0..argc {
     //     println!("argv [{}]: {:?}", i, core::str::from_utf8(argv[i]));

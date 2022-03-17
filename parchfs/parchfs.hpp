@@ -28,7 +28,7 @@ struct INode            ;
 struct DEntry           ;
 struct INodeList        ;
 struct INodeBitmap      ;
-struct FSBlockBitmap    ;
+struct BlockBitmap    ;
 struct SuperBlock       ;
 struct ParchFS          ;
 
@@ -113,7 +113,7 @@ struct INodeBitmap {
     size_t first_available();
 };
 
-struct FSBlockBitmap {
+struct BlockBitmap {
     uint8_t data[16*4096];
 
     void clear_all();
@@ -123,8 +123,6 @@ struct FSBlockBitmap {
     bool get(int pos);
     size_t first_available();
 };
-
-typedef FSBlockBitmap MMBlockBitmap;
 
 struct SuperBlock {
     uint64_t magic;
@@ -154,8 +152,8 @@ struct MMAPBinContent {
 
 struct ParchFS {
     SuperBlock* superblock;
-    FSBlockBitmap* fs_block_bitmap;
-    MMBlockBitmap* mm_block_bitmap;
+    BlockBitmap* fs_block_bitmap;
+    BlockBitmap* mm_block_bitmap;
     INodeBitmap* inode_bitmap;
     INodeList* inode_list;
     MMAPBinContent mmap_bin;
@@ -186,7 +184,7 @@ static_assert(sizeof(INode          ) == 256            , "INode malformed");
 static_assert(sizeof(DEntry         ) == 128            , "DEntry malformed");
 static_assert(sizeof(INodeList      ) == 512 * BLK_SIZE, "INodeList malformed");
 static_assert(sizeof(INodeBitmap    ) == BLK_SIZE      , "INodeBitmap malformed");
-static_assert(sizeof(FSBlockBitmap  ) == 16  *BLK_SIZE , "BlockBitmap malformed");
+static_assert(sizeof(BlockBitmap  ) == 16  *BLK_SIZE , "BlockBitmap malformed");
 static_assert(sizeof(SuperBlock     ) == BLK_SIZE      , "SuperBlock malformed");
 
 const size_t DENTRY_PER_BLK = BLK_SIZE / sizeof(DEntry);

@@ -211,35 +211,35 @@ size_t INodeBitmap::first_available() {
     panic("inode bitmap full");
 }
 
-void FSBlockBitmap::clear_all() {
+void BlockBitmap::clear_all() {
     memset(this->data, 0, sizeof(this->data));
 }
 
-void FSBlockBitmap::set(int pos) {
+void BlockBitmap::set(int pos) {
     size_t byte_pos = pos / 8;
     size_t bit_pos = pos % 8;
     set_bit(this->data[byte_pos], bit_pos);
 }
 
-void FSBlockBitmap::clear(int pos) {
+void BlockBitmap::clear(int pos) {
     size_t byte_pos = pos / 8;
     size_t bit_pos = pos % 8;
     set_bit(this->data[byte_pos], bit_pos);
 }
 
-void FSBlockBitmap::set_val(int pos, bool val) {
+void BlockBitmap::set_val(int pos, bool val) {
     size_t byte_pos = pos / 8;
     size_t bit_pos = pos % 8;
     set_bit_val(this->data[byte_pos], val, bit_pos);
 }
 
-bool FSBlockBitmap::get(int pos) {
+bool BlockBitmap::get(int pos) {
     size_t byte_pos = pos / 8;
     size_t bit_pos = pos % 8;
     return get_bit(this->data[byte_pos], bit_pos);
 }
 
-size_t FSBlockBitmap::first_available() {
+size_t BlockBitmap::first_available() {
     for (size_t i = 0; i < sizeof(this->data) * 8; i++) {
         if (!this->get(i)) {
             return i;
@@ -357,10 +357,10 @@ ParchFS::ParchFS(const char* src_bin, const char* src_sym): mmap_bin(MMAPBinCont
     }
 
     superblock      = (SuperBlock*      )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock));
-    fs_block_bitmap = (FSBlockBitmap*   )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap));
-    mm_block_bitmap = (FSBlockBitmap*   )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap));
-    inode_bitmap    = (INodeBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap) - sizeof(INodeBitmap));
-    inode_list      = (INodeList*       )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(FSBlockBitmap) - sizeof(MMBlockBitmap) - sizeof(INodeBitmap) - sizeof(INodeList));
+    fs_block_bitmap = (BlockBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(BlockBitmap));
+    mm_block_bitmap = (BlockBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(BlockBitmap) - sizeof(BlockBitmap));
+    inode_bitmap    = (INodeBitmap*     )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(BlockBitmap) - sizeof(BlockBitmap) - sizeof(INodeBitmap));
+    inode_list      = (INodeList*       )(mmap_bin.mmap_ptr + (e_reserve - s_kernel) - sizeof(SuperBlock) - sizeof(BlockBitmap) - sizeof(BlockBitmap) - sizeof(INodeBitmap) - sizeof(INodeList));
 
     // magic assert
     assert(MMapAddr(superblock      ) - mmap_bin.mmap_ptr + uint64_t(s_kernel) == 0xFFFFF000);
@@ -378,14 +378,17 @@ ParchFS::ParchFS(const char* src_bin, const char* src_sym): mmap_bin(MMAPBinCont
     superblock->init(s_reserve - e_kernel);
 
     fs_block_bitmap->set(BAD_BLOCK);
+    mm_block_bitmap->set(BAD_BLOCK);
     inode_bitmap->set(BAD_INODE);
 
     // mark used block
     for (BlockNo blk_no = pa2blkno(s_kernel); blk_no <= pa2blkno(e_kernel); blk_no++) {
         fs_block_bitmap->set(blk_no);
+        mm_block_bitmap->set(blk_no);
     }
     for (BlockNo blk_no = pa2blkno(s_reserve) - 1; blk_no < pa2blkno(e_reserve); blk_no++) {
         fs_block_bitmap->set(blk_no);
+        mm_block_bitmap->set(blk_no);
     }
 
     // make rootdir on INode 1, parent Node 1
@@ -465,10 +468,11 @@ INodeNo ParchFS::alloc_inode() {
 BlockNo ParchFS::alloc_blk() {
     BlockNo res = fs_block_bitmap->first_available();
     fs_block_bitmap->set(res);
+    mm_block_bitmap->set(res);
     superblock->free_block--;
     // 0 for BAD_INODE or BAD_BLOCK
     memset(this->get_blk(res), 0, BLK_SIZE);
-    // std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
+    std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
     return res;
 }
 
@@ -514,7 +518,7 @@ INodeNo ParchFS::make_file(INodeNo parent, uint8_t* name, size_t name_len) {
 
 MMapAddr ParchFS::get_blk(BlockNo blk) {
     assert(this->fs_block_bitmap->get(blk));
-    assert(!this->mm_block_bitmap->get(blk));
+    assert(this->mm_block_bitmap->get(blk));
     return this->mmap_bin.get_blk(blk);
 }
 

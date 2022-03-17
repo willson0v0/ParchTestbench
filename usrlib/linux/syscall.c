@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/unistd.h>
 
 __attribute__((noreturn)) void todo(char* msg) {
 	printf("%s", msg);
@@ -70,3 +71,20 @@ PID tb_waitpid(PID to_wait, u64* ret) {
 	return waitpid(to_wait, ret, 0);
 }
 
+
+u64 tb_pipe(FileDescriptor fds[2]) {
+	int pipefd[2];
+	int res = pipe(pipefd);
+	fds[0] = pipefd[0];
+	fds[1] = pipefd[1];
+	return res;
+}
+
+u64 tb_sysstat(SysStat* stat_ptr) {
+	// TODO: read and parse /proc/meminfo for this
+	SysStat s = {
+		-1, -1, -1, -1
+	};
+	*stat_ptr = s;
+	return 0;
+}

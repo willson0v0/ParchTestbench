@@ -7,12 +7,13 @@ use core::fmt::Debug;
 use core::str;
 use alloc::{string::{String, ToString}, boxed::Box, vec::Vec, collections::VecDeque};
 use usrlib_rust::fmt_io::get_line;
-use usrlib_rust::syscall::{exit, getcwd};
+use usrlib_rust::syscall::{exit, getcwd, read};
 use usrlib_rust::{println, fmt_io::{getchar, getchar_noecho, STDIN, STDOUT}, utils::{error_num::ErrorNum, types::{FileDecstiptor, OpenMode}}, syscall::{chdir, fork, waitpid, close, open, exec}};
 
 #[macro_use]
 extern crate usrlib_rust;
 extern crate alloc;
+extern crate time;
 
 #[panic_handler]
 fn panic_handler(panic_info: &core::panic::PanicInfo) -> ! {
@@ -246,7 +247,13 @@ fn serve_command(cmd: String) -> Result<(), ErrorNum> {
 }
 
 fn print_header() {
-    print!("[ {} ] $ ", getcwd().unwrap());
+    let fd = open("/dev/rtc0", OpenMode::READ).unwrap();
+    let mut buf: [u8; core::mem::size_of::<usize>()] = [0u8; core::mem::size_of::<usize>()];
+    assert!(read(fd, &mut buf).unwrap() == core::mem::size_of::<usize>());
+    let epoch = usize::from_le_bytes(buf);
+    let epoch = time::OffsetDateTime::from_unix_timestamp_nanos(epoch as i128).to_offset(time::UtcOffset::east_hours(8));
+    close(fd).unwrap();
+    print!("[ {} ] {} $ ", getcwd().unwrap(), epoch.format("%F %r %z"));
 }
 
 #[no_mangle]

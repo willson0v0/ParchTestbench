@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 usrlib_rust = { path = "../../usrlib_rust" }
+time = { version = "0.2", default-features = false }

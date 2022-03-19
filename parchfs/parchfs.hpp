@@ -184,7 +184,7 @@ static_assert(sizeof(INode          ) == 256            , "INode malformed");
 static_assert(sizeof(DEntry         ) == 128            , "DEntry malformed");
 static_assert(sizeof(INodeList      ) == 512 * BLK_SIZE, "INodeList malformed");
 static_assert(sizeof(INodeBitmap    ) == BLK_SIZE      , "INodeBitmap malformed");
-static_assert(sizeof(BlockBitmap  ) == 16  *BLK_SIZE , "BlockBitmap malformed");
+static_assert(sizeof(BlockBitmap    ) == 16  *BLK_SIZE , "BlockBitmap malformed");
 static_assert(sizeof(SuperBlock     ) == BLK_SIZE      , "SuperBlock malformed");
 
 const size_t DENTRY_PER_BLK = BLK_SIZE / sizeof(DEntry);

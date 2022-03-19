@@ -34,6 +34,9 @@ void INode::write(size_t off, uint8_t* buf, size_t len, ParchFS* fs) {
     }
     while (len > 0) {
         BlockNo blk_no = this->get_blkno(off, fs, true);
+        if (blk_no == 0) {
+            panic("bad blk no");
+        }
         MMapAddr blk = fs->get_blk(blk_no);
         size_t blk_off = off % BLK_SIZE;
         size_t copy_len = len > BLK_SIZE - blk_off ? BLK_SIZE - blk_off : len;
@@ -48,6 +51,9 @@ void INode::read(size_t off, uint8_t* buf, size_t len, ParchFS* fs) {
     assert(off + len < this->f_size);
     while (len > 0) {
         BlockNo blk_no = this->get_blkno(off, fs);
+        if (blk_no == 0) {
+            panic("bad blk no");
+        }
         MMapAddr blk = fs->get_blk(blk_no);
         size_t blk_off = off % BLK_SIZE;
         size_t copy_len = len > BLK_SIZE - blk_off ? BLK_SIZE - blk_off : len;
@@ -103,18 +109,20 @@ BlockNo INode::get_blkno(size_t off, ParchFS* fs, bool create) {
         }
 
         BlockNo* indirect_blks = (BlockNo*)fs->get_blk(this->indirect_blk2);
-        for (int i = 0; i < std::min(BLKNO_PER_BLK, off / (BLKNO_PER_BLK * BLK_SIZE) + 1); i++) {
+        bool alloc_done = false;
+        for (int i = 0; !alloc_done; i++) {
             if (indirect_blks[i] == BAD_BLOCK) {
                 indirect_blks[i] = fs->alloc_blk();
             }
             
             BlockNo* indirect2_blks = (BlockNo*)fs->get_blk(indirect_blks[i]);
             for (int j = 0; j < BLKNO_PER_BLK; j++) {
-                if (indirect2_blks[i] == BAD_BLOCK) {
-                    indirect2_blks[i] = fs->alloc_blk();
+                if (indirect2_blks[j] == BAD_BLOCK) {
+                    indirect2_blks[j] = fs->alloc_blk();
 
                     size_t i2_cap = i * BLKNO_PER_BLK * BLK_SIZE + j * BLK_SIZE;
                     if (i2_cap > off) {
+                        alloc_done = true;
                         break;
                     }
                 }
@@ -135,8 +143,14 @@ DEntry* INode::get_dentry(uint32_t pos, ParchFS* fs) {
         panic("get_dentry called for non-dir inode");
     }
     // expand inode size
-    this->get_blkno((pos+1) * sizeof(DEntry), fs, true);
-    MMapAddr blk_addr = fs->get_blk(this->get_blkno(pos * sizeof(DEntry), fs, false));
+    if (this->get_blkno((pos+1) * sizeof(DEntry), fs, true) == BAD_BLOCK) {
+        panic("Bad Block");
+    }
+    BlockNo blk_no = this->get_blkno(pos * sizeof(DEntry), fs, false);
+    if (blk_no == BAD_BLOCK) {
+        panic("bad block");
+    }
+    MMapAddr blk_addr = fs->get_blk(blk_no);
     return (DEntry*)(blk_addr + (pos % DENTRY_PER_BLK) * sizeof(DEntry));
 }
 
@@ -275,6 +289,7 @@ MMAPBinContent::MMAPBinContent(const char* path) {
     if(fstat(this->fd, &st) == 0) {
         this->size = st.st_size;
         this->mmap_ptr = (MMapAddr)mmap(NULL, this->size, PROT_READ | PROT_WRITE, MAP_PRIVATE, this->fd, 0);
+        std::cout << "mmap finished, mapped @ " << (void*)this->mmap_ptr << std::endl;
     } else {
         panic("Cannot stat bin file");
     }
@@ -295,7 +310,7 @@ void MMAPBinContent::dump(std::string dest) {
 }
 
 MMapAddr MMAPBinContent::get_blk(BlockNo blk) {
-    return mmap_ptr + blk * BLK_SIZE;
+    return mmap_ptr + uint64_t(blk) * BLK_SIZE;
 }
 
 BlockNo ParchFS::pa2blkno(PhysAddr pa) {
@@ -472,13 +487,16 @@ BlockNo ParchFS::alloc_blk() {
     superblock->free_block--;
     // 0 for BAD_INODE or BAD_BLOCK
     memset(this->get_blk(res), 0, BLK_SIZE);
-    std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
+    // std::cout << "allocated new block no\t" << res << "\t@\t"<< std::hex  << uint64_t(this->ma2pa((MMapAddr)this->get_blk(res))) << std::dec << std::endl;
     return res;
 }
 
 void ParchFS::write_blk(BlockNo blkno, uint8_t buf[BLK_SIZE]) {
     if (!fs_block_bitmap->get(blkno)) {
         panic("Writing to block that was not allocated.");
+    }
+    if (blkno2ma(blkno) - mmap_bin.mmap_ptr < (uint64_t)e_kernel) {
+        panic("Overwriting kernel");
     }
     memcpy(blkno2ma(blkno), buf, BLK_SIZE);
 }

@@ -54,3 +54,4 @@ test_programs/01_write/build/parch/01_write
 
 root_fs*
 build/
+parch_utils/cat/cat

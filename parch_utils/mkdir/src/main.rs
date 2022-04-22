@@ -2,6 +2,8 @@
 #![no_main]
 #![feature(panic_info_message)]
 
+use usrlib_rust::syscall::{exit, getcwd};
+
 #[macro_use]
 extern crate usrlib_rust;
 extern crate alloc;
@@ -10,15 +12,21 @@ extern crate alloc;
 fn panic_handler(panic_info: &core::panic::PanicInfo) -> ! {
     let err = panic_info.message().unwrap();
     if let Some(location) = panic_info.location() {
-        println!("Shell panicked at {}:{}, {}", location.file(), location.line(), err);
+        println!("Mkdir panicked at {}:{}, {}", location.file(), location.line(), err);
     } else {
-        println!("Shell panicked: {}", err);
+        println!("Mkdir panicked: {}", err);
     }
-    loop {}
+    exit(-1);
 }
 
 #[no_mangle]
 fn main(argc: usize, argv: &[&[u8]]) -> isize {
-    println!("Hello world.");
+    if argc != 2 {
+        panic!("Mkdir requires exactly 2 arguments.")
+    }
+    let mut cwd = getcwd().unwrap();
+    cwd.push_str("/");
+    cwd.push_str(core::str::from_utf8(argv[1]).unwrap());
+    
     0
 }

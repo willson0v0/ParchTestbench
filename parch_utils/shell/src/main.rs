@@ -23,7 +23,7 @@ fn panic_handler(panic_info: &core::panic::PanicInfo) -> ! {
     } else {
         println!("Shell panicked: {}", err);
     }
-    loop {}
+    exit(-1);
 }
 
 fn serve_cd(cmd: String) -> Result<(), ErrorNum> {

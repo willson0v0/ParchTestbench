@@ -247,7 +247,7 @@ fn serve_command(cmd: String) -> Result<(), ErrorNum> {
 }
 
 fn print_header() {
-    let fd = open("/dev/rtc0", OpenMode::READ).unwrap();
+    let fd = open("/dev/rtc@101000", OpenMode::READ).unwrap();
     let mut buf: [u8; core::mem::size_of::<usize>()] = [0u8; core::mem::size_of::<usize>()];
     assert!(read(fd, &mut buf).unwrap() == core::mem::size_of::<usize>());
     let epoch = usize::from_le_bytes(buf);

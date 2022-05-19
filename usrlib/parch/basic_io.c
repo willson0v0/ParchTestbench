@@ -80,6 +80,10 @@ int vfprintf(int fd, char *format, va_list arg)
             {
                 put_int(fd, va_arg(arg, u64), 10, 0);
             }
+            else if (c == 'l')
+            {
+                put_int(fd, va_arg(arg, u32), 10, 0);
+            }
             else if (c == 'x')
             {
                 put_int(fd, va_arg(arg, i64), 16, 0);

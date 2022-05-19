@@ -43,6 +43,6 @@ int main(u64 argc, char* argv[]) {
 
     tb_printf("inode\tf_type\tname\r\n");
     for (i64 i = 0; i < len; i++) {
-        tb_printf("%u\t%s\t%s\r\n", buf[i].inode, ftype_name[buf[i].f_type], buf[i].name);
+        tb_printf("%l\t%s\t%s\r\n", buf[i].inode, ftype_name[buf[i].f_type], buf[i].name);
     }
 }

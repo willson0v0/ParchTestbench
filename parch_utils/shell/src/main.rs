@@ -7,7 +7,7 @@ use core::fmt::Debug;
 use core::str;
 use alloc::{string::{String, ToString}, boxed::Box, vec::Vec, collections::VecDeque};
 use usrlib_rust::fmt_io::get_line;
-use usrlib_rust::syscall::{exit, getcwd, read};
+use usrlib_rust::syscall::{exit, getcwd, ioctl, read};
 use usrlib_rust::{println, fmt_io::{getchar, getchar_noecho, STDIN, STDOUT}, utils::{error_num::ErrorNum, types::{FileDecstiptor, OpenMode}}, syscall::{chdir, fork, waitpid, close, open, exec}};
 
 #[macro_use]
@@ -40,6 +40,8 @@ fn serve_help(_cmd: String) -> Result<(), ErrorNum> {
     println!("Built-in commands:");
     println!("\tcd [dir]\t: change current working directory.");
     println!("\thelp\t: display help message.");
+    println!("\tshutdown\t: shutdown the computer.");
+    println!("\treboot\t: reboot the computer.");
     println!("\texit\t: exit shell.");
     println!("\nPlease enter built-in commands, or path to elf file to execute.");
     Ok(())
@@ -49,6 +51,18 @@ fn serve_exec(cmd: String) -> Result<(), ErrorNum> {
     let cmd = Command::parse(cmd).map_err(|_| ErrorNum::ENOEXEC)?;
     let ret = cmd.execute()?;
     println!("Program exited with code {}.", ret);
+    Ok(())
+}
+
+fn serve_shutdown(_cmd: String) -> Result<(), ErrorNum> {
+    let fd = open("/dev/poweroff", OpenMode::READ).unwrap();
+    ioctl::<(), ()>(fd, 1, (), &mut ())?;
+    Ok(())
+}
+
+fn serve_reboot(_cmd: String) -> Result<(), ErrorNum> {
+    let fd = open("/dev/reboot", OpenMode::READ).unwrap();
+    ioctl(fd, 1, (), &mut ())?;
     Ok(())
 }
 
@@ -241,6 +255,10 @@ fn serve_command(cmd: String) -> Result<(), ErrorNum> {
         serve_help(cmd)
     } else if cmd.starts_with("exit") {
         serve_exit(cmd)
+    } else if cmd.starts_with("shutdown") {
+        serve_shutdown(cmd)
+    } else if cmd.starts_with("reboot") {
+        serve_reboot(cmd)
     } else {
         serve_exec(cmd)
     }

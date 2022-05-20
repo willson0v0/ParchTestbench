@@ -214,3 +214,19 @@ pub fn getdents(fd: FileDecstiptor, buf: &mut [Dirent]) -> Result<usize, ErrorNu
         buf.len(),0,0,0
     ], SYSCALL_GETDENTS)
 }
+
+pub fn ioctl<T: Sized+Copy, F: Sized+Copy>(fd: FileDecstiptor, op: usize, param: T, res: &mut F) -> Result<usize, ErrorNum> {
+    let param = unsafe{core::slice::from_raw_parts(&param as *const T as *const u8, core::mem::size_of::<T>())};
+    let p_ptr = param.as_ptr() as usize;
+    let p_size = core::mem::size_of::<T>();
+    let r_ptr = res as *mut F as usize;
+    let r_size = core::mem::size_of::<F>();
+    do_syscall([
+        fd.0,
+        op,
+        p_ptr,
+        p_size,
+        r_ptr,
+        r_size,
+    ], SYSCALL_IOCTL)
+}

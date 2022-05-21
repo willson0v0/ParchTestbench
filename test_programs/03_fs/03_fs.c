@@ -3,10 +3,11 @@
 #include <utils.h>
 
 void single_test() {
+	tb_printf("\n\nSingle file test:\n");
 	FileDescriptor fd;
 	tb_printf("Creating test file with wrong permission...\n");
 	TB_NEG(fd = tb_open("/fs_test/test0", O_READ | O_WRITE));
-	tb_printf("\n=========\nCreating test file...\n");
+	tb_printf("Creating test file...\n");
 	TB_NON_NEG(fd = tb_open("/fs_test/test0", O_READ | O_WRITE | O_CREATE));
 	tb_printf("Writing test file...\n");
 	TB_ASSERT(tb_write(fd, "test input", 11) == 11);
@@ -24,9 +25,11 @@ void single_test() {
 	tb_printf("Deleting test file...\n");
 	TB_NON_NEG(tb_delete("/fs_test/test0"));
 	TB_NEG(fd = tb_open("/fs_test/test0", O_READ | O_WRITE));
+	tb_printf("Basic single file test passed.\n");
 }
 
 void multi_create() {
+	tb_printf("\n\nMultiple file test.\nCreating many test file...\n");
 	char* name = "/fs_test/t00";
 
 	for(int i = 0; i < 10; i++) {
@@ -41,6 +44,8 @@ void multi_create() {
 		}
 	}
 
+	tb_printf("Created many test file, checking content...\n");
+
 	for(int i = 0; i < 10; i++) {
 		for (int j = 0; j < 10; j++) {
 			name[10] = '0' + i;
@@ -54,6 +59,8 @@ void multi_create() {
 		}
 	}
 
+	tb_printf("Checking directory content...\n");
+
 	i64 res = tb_fork();
 	if(res == 0) {
 		char* param1 = "/fs_test";
@@ -62,6 +69,59 @@ void multi_create() {
 	} else {
 		tb_waitpid(res, 0);
 	}
+
+	tb_printf("Multiple file test passed.\n");
+}
+
+void large_file() {
+	tb_printf("\n\nLarge file test.\n");
+	FileDescriptor fd;
+	tb_printf("\nCreating test file...\n");
+	TB_NON_NEG(fd = tb_open("/fs_test/test_big", O_READ | O_WRITE | O_CREATE));
+	tb_printf("Writing test file...\n");
+	for (u64 i = 0; i < 10000; i++) {
+		TB_ASSERT(tb_write(fd, &i, sizeof(i)) == sizeof(i));
+	}
+	tb_printf("%d byte written. \nSeeking test file...\n", sizeof(u64) * 10000);
+	TB_ASSERT(tb_seek(fd, 0) == 0);
+	char buf[15];
+	tb_printf("Reading test file...\n");
+	for (u64 i = 0; i < 10000; i++) {
+		u64 buf;
+		TB_ASSERT(tb_read(fd, &buf, sizeof(buf)) == sizeof(buf));
+		TB_ASSERT(buf == i);
+	}
+	tb_printf("Reopening and reading test file...\n");
+	TB_NON_NEG(tb_close(fd));
+	TB_NON_NEG(fd = tb_open("/fs_test/test_big", O_READ | O_WRITE));
+	for (u64 i = 0; i < 10000; i++) {
+		u64 buf;
+		TB_ASSERT(tb_read(fd, &buf, sizeof(buf)) == sizeof(buf));
+		TB_ASSERT(buf == i);
+	}
+	tb_printf("Checking mmaped read...\n");
+	u64* ptr = tb_mmap(0, sizeof(u64) * 10000, 0b011, 0x80, fd, 0);
+	
+	for (u64 i = 0; i < 10000; i++) {
+		TB_ASSERT(ptr[i] == i);
+	}
+	tb_printf("Checking mmaped write...\n");
+	for (u64 i = 0; i < 10000; i++) {
+		ptr[i] = 10000-i;
+	}
+	tb_printf("Unmapping...\n");
+	TB_ASSERT(tb_munmap(ptr, sizeof(u64) * 10000) == 0);
+
+	tb_printf("Reopening and reading test file...\n");
+	TB_NON_NEG(tb_close(fd));
+	TB_NON_NEG(fd = tb_open("/fs_test/test_big", O_READ | O_WRITE));
+	for (u64 i = 0; i < 10000; i++) {
+		u64 buf;
+		TB_ASSERT(tb_read(fd, &buf, sizeof(buf)) == sizeof(buf));
+		TB_ASSERT(buf == 10000 - i);
+	}
+
+	tb_printf("Large file test passed.\n");
 }
 
 int main() {
@@ -71,6 +131,7 @@ int main() {
 	TB_ASSERT(tb_mkdir("/fs_test", 0777) == 0);
 	single_test();
 	multi_create();
+	large_file();
 	
 	tb_printf("Deleting test folder...\n");
 	TB_NON_NEG(tb_delete("/fs_test"));

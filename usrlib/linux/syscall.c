@@ -79,7 +79,8 @@ __attribute__((noreturn)) void tb_exit(u64 code) {
 	exit(code);
 }
 
-void* tb_mmap(FileDescriptor fd, u64 flag) {
+void* tb_mmap(void* tgt, u64 length, u64 prot, u64 flag, FileDescriptor fd, u64 offset) {
+
 	struct stat st;
 	fstat(fd, &st);
 	u64 linux_flag = 0;
@@ -92,7 +93,7 @@ void* tb_mmap(FileDescriptor fd, u64 flag) {
 	if(flag & (1 << 3)) {
 		linux_flag |= PROT_EXEC;
 	}
-	mmap(0, st.st_size, linux_flag, MAP_SHARED, fd, 0);
+	mmap(tgt, st.st_size, linux_flag, flag, fd, offset);
 }
 
 PID tb_waitpid(PID to_wait, u64* ret) {
@@ -131,4 +132,8 @@ u64 tb_mkdir(void* path, u64 perm) {
 
 u64 tb_seek(FileDescriptor fd, u64 offset) {
 	return lseek(fd, offset, SEEK_SET);
+}
+
+u64 tb_munmap(void* ptr, u64 length) {
+	return munmap(ptr, length);
 }

@@ -25,3 +25,14 @@ void* tb_malloc(u64 len) {
 void tb_free(void* ptr) {
     free(ptr);
 }
+
+u64 tb_strcmp(char* c1, char* c2) {
+    strcmp(c1, c2);
+}
+
+void do_assert(int res, char* op) {
+	if (!res) {
+		tb_printf("Operation \"%s\" failed\n", op);
+		tb_exit(-1);
+	}
+}

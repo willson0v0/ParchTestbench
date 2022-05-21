@@ -2,7 +2,7 @@
 #![no_main]
 #![feature(panic_info_message)]
 
-use usrlib_rust::syscall::{exit, getcwd};
+use usrlib_rust::{syscall::{exit, getcwd, mkdir}, utils::types::Permission};
 
 #[macro_use]
 extern crate usrlib_rust;
@@ -22,11 +22,9 @@ fn panic_handler(panic_info: &core::panic::PanicInfo) -> ! {
 #[no_mangle]
 fn main(argc: usize, argv: &[&[u8]]) -> isize {
     if argc != 2 {
-        panic!("Mkdir requires exactly 2 arguments.")
+        panic!("Mkdir requires exactly 1 arguments.")
     }
-    let mut cwd = getcwd().unwrap();
-    cwd.push_str("/");
-    cwd.push_str(core::str::from_utf8(argv[1]).unwrap());
-    
+    let path = core::str::from_utf8(argv[1]).unwrap();
+    mkdir(path, Permission::default()).unwrap();
     0
 }

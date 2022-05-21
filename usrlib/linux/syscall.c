@@ -7,6 +7,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/unistd.h>
+#include <errno.h>
 
 __attribute__((noreturn)) void todo(char* msg) {
 	printf("%s", msg);
@@ -23,11 +24,39 @@ u64 tb_read(FileDescriptor fd, char* buf, u64 length) {
 }
 
 FileDescriptor tb_open(char* path, int flags) {
-	return open(path, flags);
+	int l_flag = 0;
+	if (flags & O_READ) {
+		if (flags & O_WRITE) {
+			l_flag |= LINUX_RDWR;
+		} else {
+			l_flag |= LINUX_RDONLY;
+		}
+	}
+	if (flags & O_CREATE) {
+		l_flag |= LINUX_CREAT;
+	}
+	if (flags & O_NO_FOLLOW) {
+		l_flag |= LINUX_NOFOLLOW;
+	}
+	return open(path, l_flag);
 }
 
 FileDescriptor tb_openat(FileDescriptor dirfd, char* path, int flags) {
-	return openat(dirfd, path, flags);
+	int l_flag = 0;
+	if (flags & O_READ) {
+		if (flags & O_WRITE) {
+			l_flag |= LINUX_RDWR;
+		} else {
+			l_flag |= LINUX_RDONLY;
+		}
+	}
+	if (flags & O_CREATE) {
+		l_flag |= LINUX_CREAT;
+	}
+	if (flags & O_NO_FOLLOW) {
+		l_flag |= LINUX_NOFOLLOW;
+	}
+	return openat(dirfd, path, l_flag);
 }
 
 u64 tb_close(FileDescriptor fd) {
@@ -50,7 +79,6 @@ __attribute__((noreturn)) void tb_exit(u64 code) {
 	exit(code);
 }
 
-// TODO: change flag to linux format
 void* tb_mmap(FileDescriptor fd, u64 flag) {
 	struct stat st;
 	fstat(fd, &st);
@@ -87,4 +115,20 @@ u64 tb_sysstat(SysStat* stat_ptr) {
 	};
 	*stat_ptr = s;
 	return 0;
+}
+
+u64 tb_ioctl(FileDescriptor _fd, u64 op, void* _a, u64 _b, void* _c, u64 _d) {
+	-EINVAL;
+}
+
+u64 tb_delete(void* path) {
+	return unlink(path);
+}
+
+u64 tb_mkdir(void* path, u64 perm) {
+	return mkdir(path, perm);
+}
+
+u64 tb_seek(FileDescriptor fd, u64 offset) {
+	return lseek(fd, offset, SEEK_SET);
 }

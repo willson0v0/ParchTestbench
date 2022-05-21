@@ -230,3 +230,30 @@ pub fn ioctl<T: Sized+Copy, F: Sized+Copy>(fd: FileDecstiptor, op: usize, param:
         r_size,
     ], SYSCALL_IOCTL)
 }
+
+pub fn delete(path: &str) -> Result<usize, ErrorNum> {
+    let mut arr = path.as_bytes().to_vec();
+    arr.push(0);
+    do_syscall([
+        arr.as_ptr() as usize,
+        0,0,0,0,0
+    ], SYSCALL_DELETE).map(|f| f.into())
+}
+
+pub fn mkdir(path: &str, perm: Permission) -> Result<usize, ErrorNum> {
+    let mut arr = path.as_bytes().to_vec();
+    arr.push(0);
+    do_syscall([
+        arr.as_ptr() as usize,
+        perm.bits() as usize
+        ,0,0,0,0
+    ], SYSCALL_MKDIR).map(|f| f.into())
+}
+
+pub fn seek(fd: FileDecstiptor, offset: usize) -> Result<usize, ErrorNum> {
+    do_syscall([
+        fd.0,
+        offset,
+        0,0,0,0
+    ], SYSCALL_SEEK)
+}

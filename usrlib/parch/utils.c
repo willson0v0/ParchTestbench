@@ -141,3 +141,18 @@ tb_malloc(u64 nbytes)
         return 0;
   }
 }
+
+u64 tb_strcmp(char* c1, char* c2) {
+  while (*c1 && *c2) {
+    if (*c1 != *c2) {break;}
+    c1++; c2++;
+  }
+  return *c1 - *c2;
+}
+
+void do_assert(int res, char* op) {
+	if (!res) {
+		tb_printf("Operation \"%s\" failed\n", op);
+		tb_exit(-1);
+	}
+}

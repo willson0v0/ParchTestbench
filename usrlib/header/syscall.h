@@ -3,6 +3,17 @@
 
 #include "type.h"
 
+#define LINUX_RDONLY	00000000
+#define LINUX_WRONLY	00000001
+#define LINUX_RDWR		00000002
+#define LINUX_CREAT		00000100	/* not fcntl */
+#define LINUX_NOFOLLOW	00400000	/* don't follow links */
+
+#define O_READ      0b0000001
+#define O_WRITE     0b0000010
+#define O_CREATE    0b0000100
+#define O_NO_FOLLOW 0b0100000	/* don't follow links */
+
 u64 tb_write(FileDescriptor, char*, u64);
 u64 tb_read(FileDescriptor, char*, u64);
 FileDescriptor tb_open(char*, int);
@@ -23,5 +34,9 @@ char* tb_sbrk(i64);
 u64 tb_getdents(FileDescriptor, Dirent*, u64);
 u64 tb_pipe(FileDescriptor fds[2]);
 u64 tb_sysstat(SysStat* stat_ptr);
+u64 tb_ioctl(FileDescriptor, u64, void*, u64, void*, u64);
+u64 tb_delete(void*);
+u64 tb_mkdir(void*, u64);
+u64 tb_seek(FileDescriptor, u64);
 
 #endif

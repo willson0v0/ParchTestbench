@@ -8,6 +8,8 @@
 #include <sys/wait.h>
 #include <sys/unistd.h>
 #include <errno.h>
+#include <sys/time.h>
+#include <string.h>
 
 __attribute__((noreturn)) void todo(char* msg) {
 	printf("%s", msg);
@@ -79,21 +81,29 @@ __attribute__((noreturn)) void tb_exit(u64 code) {
 	exit(code);
 }
 
-void* tb_mmap(void* tgt, u64 length, u64 prot, u64 flag, FileDescriptor fd, u64 offset) {
-
-	struct stat st;
-	fstat(fd, &st);
+void* tb_mmap(void* tgt, u64 length, u64 prot, u64 flag, FileDescriptor fd, u64 offset) 
+{
+	u64 linux_prot = 0;
+	if(prot & (1 << 0)) {
+		linux_prot |= PROT_READ;
+	}
+	if(prot & (1 << 1)) {
+		linux_prot |= PROT_WRITE;
+	}
+	if(prot & (1 << 2)) {
+		linux_prot |= PROT_EXEC;
+	}
 	u64 linux_flag = 0;
-	if(flag & (1 << 1)) {
-		linux_flag |= PROT_READ;
+	if (flag & 0x80) {
+		linux_flag |= MAP_SHARED;
+	} else {
+		linux_flag |= MAP_PRIVATE;
 	}
-	if(flag & (1 << 2)) {
-		linux_flag |= PROT_WRITE;
+	void* res = mmap(NULL, length,  linux_prot, MAP_SHARED, fd, 0);
+	if (res == MAP_FAILED) {
+		printf("err %s\n", strerror(errno));
 	}
-	if(flag & (1 << 3)) {
-		linux_flag |= PROT_EXEC;
-	}
-	mmap(tgt, st.st_size, linux_flag, flag, fd, offset);
+	return res;
 }
 
 PID tb_waitpid(PID to_wait, u64* ret) {
@@ -123,11 +133,19 @@ u64 tb_ioctl(FileDescriptor _fd, u64 op, void* _a, u64 _b, void* _c, u64 _d) {
 }
 
 u64 tb_delete(void* path) {
-	return unlink(path);
+	i64 res = remove(path);
+	if(res < 0) {
+		printf("err %s\n", strerror(errno));
+	}
+	return res;
 }
 
 u64 tb_mkdir(void* path, u64 perm) {
-	return mkdir(path, perm);
+	u64 res = mkdir(path, perm);
+	if ((i64)res < 0) {
+		printf("err %s\n", strerror(errno));
+	}
+	return res;
 }
 
 u64 tb_seek(FileDescriptor fd, u64 offset) {
@@ -136,4 +154,11 @@ u64 tb_seek(FileDescriptor fd, u64 offset) {
 
 u64 tb_munmap(void* ptr, u64 length) {
 	return munmap(ptr, length);
+}
+
+u64 tb_time() {
+    struct timeval te; 
+    gettimeofday(&te, NULL); // get current time
+    u64 milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
+    return milliseconds;
 }

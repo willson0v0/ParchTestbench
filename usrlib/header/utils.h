@@ -15,5 +15,6 @@ void* tb_malloc(u64);
 void tb_free(void*);
 u64 tb_strcmp(char*, char*);
 void do_assert(int, char*);
+void tb_msync(void*, u64);
 
 #endif

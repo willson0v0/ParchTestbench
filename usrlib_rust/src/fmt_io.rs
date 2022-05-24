@@ -29,10 +29,10 @@ macro_rules! print {
 #[macro_export]
 macro_rules! println {
     () =>  {
-        print!("\n");
+        print!("\r\n");
     };
     ($fmt: literal $(, $($arg: tt)+)?) => {
-        $crate::fmt_io::print(format_args!(concat!($fmt, "\n") $(, $($arg)+)?));
+        $crate::fmt_io::print(format_args!(concat!($fmt, "\r\n") $(, $($arg)+)?));
     }
 }
 

@@ -39,5 +39,6 @@ u64 tb_ioctl(FileDescriptor, u64, void*, u64, void*, u64);
 u64 tb_delete(void*);
 u64 tb_mkdir(void*, u64);
 u64 tb_seek(FileDescriptor, u64);
+u64 tb_time();
 
 #endif

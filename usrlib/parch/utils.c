@@ -1,5 +1,6 @@
 #include "../header/utils.h"
 #include "../header/syscall.h"
+#include "../header/basic_io.h"
 
 void tb_memcpy(u8* src, u8* dst, u64 len) {
     while (len --> 0) {
@@ -155,4 +156,8 @@ void do_assert(int res, char* op) {
 		tb_printf("Operation \"%s\" failed\n", op);
 		tb_exit(-1);
 	}
+}
+
+void tb_msync(void* addr, u64 len) {
+    // no need to sync in parchfs~
 }

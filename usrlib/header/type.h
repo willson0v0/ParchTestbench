@@ -1,6 +1,8 @@
 #ifndef TYPE_H
 #define TYPE_H
 
+#include<stdbool.h>
+
 typedef unsigned long long int u64;
 typedef unsigned int u32;
 typedef unsigned short u16;

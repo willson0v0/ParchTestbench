@@ -1,6 +1,8 @@
 #include "../header/utils.h"
 #include "string.h"
 #include "malloc.h"
+#include "sys/mman.h"
+#include "errno.h"
 
 void tb_memcpy(u8* src, u8* dst, u64 len) {
     memcpy(dst, src, len);
@@ -32,7 +34,13 @@ u64 tb_strcmp(char* c1, char* c2) {
 
 void do_assert(int res, char* op) {
 	if (!res) {
-		tb_printf("Operation \"%s\" failed\n", op);
-		tb_exit(-1);
+		printf("Operation \"%s\" failed\n", op);
+		exit(-1);
 	}
+}
+
+void tb_msync(void* addr, u64 len) {
+    if (msync(addr, len, MS_SYNC | MS_INVALIDATE) < 0) {
+        printf("msync failed %s", strerror(errno));
+    }
 }

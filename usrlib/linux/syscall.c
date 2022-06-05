@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <sys/time.h>
 #include <string.h>
+#include <signal.h>
 
 __attribute__((noreturn)) void todo(char* msg) {
 	printf("%s", msg);
@@ -161,4 +162,13 @@ u64 tb_time() {
     gettimeofday(&te, NULL); // get current time
     u64 milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
     return milliseconds;
+}
+
+
+u64 tb_signal(PID pid, SignalNum signal) {
+	kill(pid, signal);
+}
+
+u64 tb_sigaction(SignalNum sig, SigHandler handler){
+	signal(sig, handler);
 }

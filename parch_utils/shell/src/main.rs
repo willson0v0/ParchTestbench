@@ -265,14 +265,17 @@ fn serve_command(cmd: String) -> Result<(), ErrorNum> {
 }
 
 fn print_header() {
-    // let fd = open("/dev/rtc@101000", OpenMode::READ).unwrap();
-    // let mut buf: [u8; core::mem::size_of::<usize>()] = [0u8; core::mem::size_of::<usize>()];
-    // assert!(read(fd, &mut buf).unwrap() == core::mem::size_of::<usize>());
-    // let epoch = usize::from_le_bytes(buf);
-    // let epoch = time::OffsetDateTime::from_unix_timestamp_nanos(epoch as i128).to_offset(time::UtcOffset::east_hours(8));
-    // close(fd).unwrap();
-    // print!("[ {} ] {} $ ", getcwd().unwrap(), epoch.format("%F %r %z"));
-    print!("[ {} ] $ ", getcwd().unwrap());
+    print!("[ {} ]", getcwd().unwrap());
+    if let Ok(fd) = open("/dev/rtc@101000", OpenMode::READ) {
+        let mut buf: [u8; core::mem::size_of::<usize>()] = [0u8; core::mem::size_of::<usize>()];
+        assert!(read(fd, &mut buf).unwrap() == core::mem::size_of::<usize>());
+        let epoch = usize::from_le_bytes(buf);
+        let epoch = time::OffsetDateTime::from_unix_timestamp_nanos(epoch as i128).to_offset(time::UtcOffset::east_hours(8));
+        close(fd).unwrap();
+        print!(" {} $ ", epoch.format("%F %r %z"));
+    } else {
+        print!(" $ ");
+    }
 }
 
 #[no_mangle]

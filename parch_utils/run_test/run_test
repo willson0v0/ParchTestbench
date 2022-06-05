@@ -1,5 +1,7 @@
 #!/shell
-/ls
-cd /test
-/ls
-00_helloworld
+/test/00_helloworld
+/test/01_write
+/test/02_fork
+/test/03_fs
+/test/05_signal
+/test/06_pipe
